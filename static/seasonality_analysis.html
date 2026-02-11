@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析対象会社 売上収益の季節性分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border-top: 4px solid;
+        }
+
+        .summary-card.q1 { border-color: #FF6B6B; }
+        .summary-card.q2 { border-color: #4ECDC4; }
+        .summary-card.q3 { border-color: #FFD93D; }
+        .summary-card.q4 { border-color: #6BCF7F; }
+
+        .summary-label {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .summary-value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .summary-subtext {
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chart-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .chart-subtitle {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .insights-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .insight-card {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .insight-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .insight-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .insight-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insight-card li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .insight-card li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .seasonal-insight {
+            background: #e3f2fd;
+            border-color: #1976D2;
+        }
+        .seasonal-insight h3 { color: #1976D2; }
+        .seasonal-insight li::before { color: #1976D2; }
+
+        .trend-insight {
+            background: #f1f8e9;
+            border-color: #388E3C;
+        }
+        .trend-insight h3 { color: #388E3C; }
+        .trend-insight li::before { color: #388E3C; }
+
+        .driver-insight {
+            background: #fff3e0;
+            border-color: #F57C00;
+        }
+        .driver-insight h3 { color: #F57C00; }
+        .driver-insight li::before { color: #F57C00; }
+
+        .strategy-insight {
+            background: #fce4ec;
+            border-color: #C62828;
+        }
+        .strategy-insight h3 { color: #C62828; }
+        .strategy-insight li::before { color: #C62828; }
+
+        @media (max-width: 1200px) {
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>分析対象会社株式会社</h1>
+        <div class="subtitle">売上収益の季節性分析（2021年～2025年）</div>
+
+        <div class="summary-cards">
+            <div class="summary-card q1">
+                <div class="summary-label">Q1（第1四半期）</div>
+                <div class="summary-value">21.1%</div>
+                <div class="summary-subtext">年度初め・閑散期</div>
+            </div>
+            <div class="summary-card q2">
+                <div class="summary-label">Q2（第2四半期）</div>
+                <div class="summary-value">25.3%</div>
+                <div class="summary-subtext">安定期</div>
+            </div>
+            <div class="summary-card q3">
+                <div class="summary-label">Q3（第3四半期）</div>
+                <div class="summary-value">23.9%</div>
+                <div class="summary-subtext">安定期</div>
+            </div>
+            <div class="summary-card q4">
+                <div class="summary-label">Q4（第4四半期）</div>
+                <div class="summary-value">29.7%</div>
+                <div class="summary-subtext">年度末・繁忙期</div>
+            </div>
+        </div>
+
+        <!-- 5年間の四半期推移グラフ -->
+        <div class="chart-container">
+            <div class="chart-title">📊 四半期別構成比の推移（2021年～2025年）</div>
+            <div class="chart-subtitle">各年度における四半期ごとの構成比率（100%積み上げ）</div>
+            <div class="chart-wrapper">
+                <canvas id="quarterlyTrendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <!-- 5年間の四半期別平均 -->
+            <div class="chart-container">
+                <div class="chart-title">📈 四半期別平均構成比（5年間）</div>
+                <div class="chart-subtitle">各四半期の典型的なパターン</div>
+                <div class="chart-wrapper">
+                    <canvas id="averageQuarterChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 四半期別成長率 -->
+            <div class="chart-container">
+                <div class="chart-title">🚀 四半期別成長トレンド</div>
+                <div class="chart-subtitle">前年同期比成長率の推移</div>
+                <div class="chart-wrapper">
+                    <canvas id="growthRateChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-section">
+            <div class="insights-title">💡 季節性から読み解く事業特性</div>
+            <div class="insights-grid">
+                <div class="insight-card seasonal-insight">
+                    <h3><span class="insight-icon">📊</span>明確な季節性パターン</h3>
+                    <ul>
+                        <li><strong>Q4が最繁忙期:</strong> 5年間一貫して通期の約30%（2021年28.8%→2025年29.7%）を占める</li>
+                        <li><strong>Q1が最閑散期:</strong> 通期の約21%と最も低い。年度初めの処方控えが影響</li>
+                        <li><strong>Q2・Q3は安定:</strong> それぞれ25%前後で安定推移。事業の基盤を形成</li>
+                        <li><strong>年末効果が顕著:</strong> 医療機関の予算消化と年末の処方増加が寄与</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card trend-insight">
+                    <h3><span class="insight-icon">📈</span>成長トレンド分析</h3>
+                    <ul>
+                        <li><strong>2021年→2025年で34.0%成長:</strong> 年平均成長率（CAGR）約7.6%の堅調な拡大</li>
+                        <li><strong>Q4の成長が特に顕著:</strong> 1,069億円→1,473億円（+37.8%）と全四半期で最高</li>
+                        <li><strong>2024年がターニングポイント:</strong> 全四半期で1,000億円超を達成</li>
+                        <li><strong>季節性は維持しつつ底上げ:</strong> 構成比は安定も、絶対額は各四半期で増加</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card driver-insight">
+                    <h3><span class="insight-icon">🔍</span>季節性の要因</h3>
+                    <ul>
+                        <li><strong>Q4高水準の理由:</strong> ①医療機関の年度末予算消化、②年末の受診・処方増、③技術収入のマイルストン達成</li>
+                        <li><strong>Q1低水準の理由:</strong> ①新年度の処方様子見、②年末年始の休診影響、③運転資本の季節変動</li>
+                        <li><strong>製品特性の影響:</strong> 希少疾患治療薬は継続処方が基本だが、開始時期に季節性あり</li>
+                        <li><strong>地域別の影響:</strong> 日本・北米の会計年度（3月末・12月末）が第4四半期を押し上げ</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card strategy-insight">
+                    <h3><span class="insight-icon">🎯</span>経営への示唆</h3>
+                    <ul>
+                        <li><strong>キャッシュフロー管理:</strong> Q4に営業CF集中（2025年481億円、通期の48.1%）。計画的な資金運用が重要</li>
+                        <li><strong>コスト配分の最適化:</strong> Q1の固定費負担が重い。販管費・R&D費の平準化で利益率改善余地</li>
+                        <li><strong>四半期業績予測の精度向上:</strong> 明確な季節性を前提に、通期ガイダンスの信頼性を確保</li>
+                        <li><strong>新製品投入時期の戦略:</strong> Q4前の承認取得で初年度売上最大化を図る</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // データ定義
+        const quarterlyData = {
+            years: ['2021', '2022', '2023', '2024', '2025'],
+            q1: [813, 849, 890, 1081, 1047],
+            q2: [940, 1073, 1075, 1300, 1259],
+            q3: [884, 1117, 1127, 1282, 1188],
+            q4: [1069, 1283, 1331, 1294, 1473]
+        };
+
+        // 2025年四半期別データ
+        const seasonality2025 = {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            values: [1047, 1259, 1188, 1473],
+            percentages: [21.1, 25.3, 23.9, 29.7]
+        };
+
+        // 5年平均構成比
+        const averageQuarter = {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            values: [21.8, 25.0, 24.4, 28.8]
+        };
+
+        // 四半期別成長率（前年同期比）
+        const growthRates = {
+            years: ['2022', '2023', '2024', '2025'],
+            q1: [4.4, 4.8, 21.5, -3.1],
+            q2: [14.1, 0.2, 20.9, -3.2],
+            q3: [26.4, 0.9, 13.8, -7.3],
+            q4: [20.0, 3.7, -2.8, 13.8]
+        };
+
+        // 1. 四半期推移グラフ（100%積み上げ棒グラフ）
+        const trendCtx = document.getElementById('quarterlyTrendChart').getContext('2d');
+        
+        // 各年の合計を計算して構成比を算出
+        const percentageData = {
+            years: quarterlyData.years,
+            q1: [],
+            q2: [],
+            q3: [],
+            q4: []
+        };
+        
+        for (let i = 0; i < quarterlyData.years.length; i++) {
+            const total = quarterlyData.q1[i] + quarterlyData.q2[i] + quarterlyData.q3[i] + quarterlyData.q4[i];
+            percentageData.q1.push((quarterlyData.q1[i] / total * 100).toFixed(1));
+            percentageData.q2.push((quarterlyData.q2[i] / total * 100).toFixed(1));
+            percentageData.q3.push((quarterlyData.q3[i] / total * 100).toFixed(1));
+            percentageData.q4.push((quarterlyData.q4[i] / total * 100).toFixed(1));
+        }
+        
+        new Chart(trendCtx, {
+            type: 'bar',
+            data: {
+                labels: quarterlyData.years,
+                datasets: [
+                    {
+                        label: 'Q1',
+                        data: percentageData.q1,
+                        backgroundColor: '#FF6B6B',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Q2',
+                        data: percentageData.q2,
+                        backgroundColor: '#4ECDC4',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Q3',
+                        data: percentageData.q3,
+                        backgroundColor: '#FFD93D',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Q4',
+                        data: percentageData.q4,
+                        backgroundColor: '#6BCF7F',
+                        borderWidth: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: '構成比（%）'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const yearIndex = context.dataIndex;
+                                const quarter = context.dataset.label;
+                                const percentage = context.parsed.y;
+                                const actualValue = quarterlyData[quarter.toLowerCase()][yearIndex];
+                                return [
+                                    `${quarter}: ${percentage}%`,
+                                    `実額: ${actualValue}億円`
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. 5年平均構成比（円グラフ）
+        const averageCtx = document.getElementById('averageQuarterChart').getContext('2d');
+        new Chart(averageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: averageQuarter.labels,
+                datasets: [{
+                    data: averageQuarter.values,
+                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#FFD93D', '#6BCF7F'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.parsed}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. 成長率グラフ（折れ線グラフ）
+        const growthCtx = document.getElementById('growthRateChart').getContext('2d');
+        new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: growthRates.years,
+                datasets: [
+                    {
+                        label: 'Q1成長率',
+                        data: growthRates.q1,
+                        borderColor: '#FF6B6B',
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Q2成長率',
+                        data: growthRates.q2,
+                        borderColor: '#4ECDC4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Q3成長率',
+                        data: growthRates.q3,
+                        borderColor: '#FFD93D',
+                        backgroundColor: 'rgba(255, 217, 61, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Q4成長率',
+                        data: growthRates.q4,
+                        borderColor: '#6BCF7F',
+                        backgroundColor: 'rgba(107, 207, 127, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: '成長率（%）'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析対象会社 売上構成分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chart-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .chart-subtitle {
+            font-size: 1em;
+            color: #666;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 450px;
+            margin-bottom: 20px;
+        }
+
+        .legend-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .legend-table th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .legend-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .legend-name {
+            font-weight: 500;
+        }
+
+        .legend-amount {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .legend-percentage {
+            text-align: right;
+            color: #666;
+        }
+
+        .insights-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .insight-card {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .insight-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .insight-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .insight-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insight-card li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .insight-card li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .product-insight {
+            background: #e3f2fd;
+            border-color: #1976D2;
+        }
+        .product-insight h3 { color: #1976D2; }
+        .product-insight li::before { color: #1976D2; }
+
+        .region-insight {
+            background: #f1f8e9;
+            border-color: #388E3C;
+        }
+        .region-insight h3 { color: #388E3C; }
+        .region-insight li::before { color: #388E3C; }
+
+        .trend-insight {
+            background: #fff3e0;
+            border-color: #F57C00;
+        }
+        .trend-insight h3 { color: #F57C00; }
+        .trend-insight li::before { color: #F57C00; }
+
+        .strategy-insight {
+            background: #fce4ec;
+            border-color: #C62828;
+        }
+        .strategy-insight h3 { color: #C62828; }
+        .strategy-insight li::before { color: #C62828; }
+
+        .total-revenue {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .total-revenue-label {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .total-revenue-amount {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .total-revenue-breakdown {
+            font-size: 1em;
+            opacity: 0.85;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .chart-wrapper {
+                height: 350px;
+            }
+
+            .total-revenue-amount {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>分析対象会社株式会社</h1>
+        <div class="subtitle">売上構成分析（2025年度）</div>
+
+        <div class="total-revenue">
+            <div class="total-revenue-label">2025年度 総売上収益</div>
+            <div class="total-revenue-amount">4,968億円</div>
+            <div class="total-revenue-breakdown">製品売上: 4,384億円 (88.2%) ｜ 技術収入: 584億円 (11.8%)</div>
+        </div>
+
+        <div class="charts-grid">
+            <!-- 製品別売上構成 -->
+            <div class="chart-container">
+                <div class="chart-title">📊 製品別売上構成</div>
+                <div class="chart-subtitle">主要製品と技術収入の内訳</div>
+                <div class="chart-wrapper">
+                    <canvas id="productChart"></canvas>
+                </div>
+                <table class="legend-table">
+                    <thead>
+                        <tr>
+                            <th>製品名</th>
+                            <th style="text-align: right;">金額</th>
+                            <th style="text-align: right;">構成比</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productLegend">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 地域別売上構成 -->
+            <div class="chart-container">
+                <div class="chart-title">🌍 地域別売上構成</div>
+                <div class="chart-subtitle">グローバル展開の状況</div>
+                <div class="chart-wrapper">
+                    <canvas id="regionChart"></canvas>
+                </div>
+                <table class="legend-table">
+                    <thead>
+                        <tr>
+                            <th>地域</th>
+                            <th style="text-align: right;">金額</th>
+                            <th style="text-align: right;">構成比</th>
+                            <th style="text-align: right;">成長率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="regionLegend">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="insights-section">
+            <div class="insights-title">💡 売上構成から見る戦略的示唆</div>
+            <div class="insights-grid">
+                <div class="insight-card product-insight">
+                    <h3><span class="insight-icon">💊</span>製品ポートフォリオ分析</h3>
+                    <ul>
+                        <li><strong>Crysvita依存度40.8%:</strong> 単一製品への集中リスクが高い。パイプライン多様化が急務</li>
+                        <li><strong>グローバル戦略品が売上の約50%:</strong> Crysvita + Poteligeo + Libmeldy/Lenmeldy で事業の中核を形成</li>
+                        <li><strong>日本戦略品は成長中:</strong> ダーブロック（+21.6%）、フォゼベル（+76.7%）が好調</li>
+                        <li><strong>技術収入11.8%:</strong> ライセンス戦略が収益の第二の柱として確立</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card region-insight">
+                    <h3><span class="insight-icon">🌐</span>地域別事業展開</h3>
+                    <ul>
+                        <li><strong>北米が最大市場38.7%:</strong> 成長率+10.4%で事業拡大が加速。米国工場建設で現地化推進</li>
+                        <li><strong>日本市場は縮小傾向:</strong> 構成比24.7%（△9.0%）。薬価改定の影響継続</li>
+                        <li><strong>EMEA・アジアは調整期:</strong> 事業再編により一時的に減収も、戦略品への集中進む</li>
+                        <li><strong>グローバル売上75%超:</strong> 為替リスク管理と現地製造が重要課題</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card trend-insight">
+                    <h3><span class="insight-icon">📈</span>成長トレンド</h3>
+                    <ul>
+                        <li><strong>希少疾患市場の拡大:</strong> Crysvita成長率9.7%、Poteligeo 15.6%で市場浸透進む</li>
+                        <li><strong>遺伝子治療の急成長:</strong> Libmeldy/Lenmeldy +96.1%、今後の成長分野として期待</li>
+                        <li><strong>技術収入の安定成長:</strong> 2021年8.4%→2025年11.8%と構成比上昇</li>
+                        <li><strong>新製品が2026年以降本格貢献:</strong> ziftomenib、ロカチンリマブで製品構成が変化</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card strategy-insight">
+                    <h3><span class="insight-icon">🎯</span>戦略的課題と対応</h3>
+                    <ul>
+                        <li><strong>製品集中リスク低減:</strong> ロカチンリマブ、OTL-203の上市でCrysvita依存を30%以下に</li>
+                        <li><strong>日本事業の構造改革:</strong> 長期収載品縮小、新製品育成、コスト削減で収益性改善</li>
+                        <li><strong>北米事業の拡大継続:</strong> 現地製造、新製品投入で構成比40%超を目指す</li>
+                        <li><strong>技術収入の拡大:</strong> 抗体技術のライセンスアウトで15%以上の構成比を目標</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 製品別データ
+        const productData = {
+            labels: [
+                'Crysvita',
+                'Poteligeo',
+                'ダーブロック',
+                'ジーラスタ',
+                'フォゼベル',
+                'Libmeldy/Lenmeldy',
+                'その他製品',
+                '技術収入'
+            ],
+            values: [2028, 441, 155, 182, 82, 64, 1432, 584],
+            colors: [
+                '#1976D2', // Crysvita - Blue
+                '#388E3C', // Poteligeo - Green
+                '#F57C00', // ダーブロック - Orange
+                '#7B1FA2', // ジーラスタ - Purple
+                '#C62828', // フォゼベル - Red
+                '#0288D1', // Libmeldy - Light Blue
+                '#757575', // その他 - Grey
+                '#FFB300'  // 技術収入 - Amber
+            ]
+        };
+
+        // 地域別データ
+        const regionData = {
+            labels: ['北米', '日本', 'アジア・その他', 'EMEA'],
+            values: [1925, 1229, 981, 837],
+            growth: ['+10.4%', '△9.0%', '△3.4%', '△1.5%'],
+            colors: [
+                '#1976D2', // 北米 - Blue
+                '#C62828', // 日本 - Red
+                '#388E3C', // アジア - Green
+                '#F57C00'  // EMEA - Orange
+            ]
+        };
+
+        // 製品別円グラフ
+        const productCtx = document.getElementById('productChart').getContext('2d');
+        const productChart = new Chart(productCtx, {
+            type: 'doughnut',
+            data: {
+                labels: productData.labels,
+                datasets: [{
+                    data: productData.values,
+                    backgroundColor: productData.colors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value}億円 (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 地域別円グラフ
+        const regionCtx = document.getElementById('regionChart').getContext('2d');
+        const regionChart = new Chart(regionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: regionData.labels,
+                datasets: [{
+                    data: regionData.values,
+                    backgroundColor: regionData.colors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value}億円 (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 製品別凡例テーブル作成
+        const productLegend = document.getElementById('productLegend');
+        const productTotal = productData.values.reduce((a, b) => a + b, 0);
+        productData.labels.forEach((label, index) => {
+            const value = productData.values[index];
+            const percentage = ((value / productTotal) * 100).toFixed(1);
+            const row = `
+                <tr>
+                    <td>
+                        <span class="legend-color" style="background-color: ${productData.colors[index]}"></span>
+                        <span class="legend-name">${label}</span>
+                    </td>
+                    <td class="legend-amount">${value.toLocaleString()}億円</td>
+                    <td class="legend-percentage">${percentage}%</td>
+                </tr>
+            `;
+            productLegend.innerHTML += row;
+        });
+
+        // 地域別凡例テーブル作成
+        const regionLegend = document.getElementById('regionLegend');
+        const regionTotal = regionData.values.reduce((a, b) => a + b, 0);
+        regionData.labels.forEach((label, index) => {
+            const value = regionData.values[index];
+            const percentage = ((value / regionTotal) * 100).toFixed(1);
+            const row = `
+                <tr>
+                    <td>
+                        <span class="legend-color" style="background-color: ${regionData.colors[index]}"></span>
+                        <span class="legend-name">${label}</span>
+                    </td>
+                    <td class="legend-amount">${value.toLocaleString()}億円</td>
+                    <td class="legend-percentage">${percentage}%</td>
+                    <td class="legend-percentage">${regionData.growth[index]}</td>
+                </tr>
+            `;
+            regionLegend.innerHTML += row;
+        });
+    </script>
+</body>
+</html>

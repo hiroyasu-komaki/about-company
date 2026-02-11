@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析対象会社 TGR分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .tgr-overview {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .overview-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .overview-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .tgr-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .tgr-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-top: 5px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .tgr-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .tgr-card.technology {
+            border-color: #1976D2;
+            background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+        }
+
+        .tgr-card.growth {
+            border-color: #388E3C;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f8e9 100%);
+        }
+
+        .tgr-card.rationalization {
+            border-color: #F57C00;
+            background: linear-gradient(135deg, #ffffff 0%, #fff3e0 100%);
+        }
+
+        .tgr-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .tgr-icon {
+            font-size: 3em;
+            margin-right: 15px;
+        }
+
+        .tgr-card-title {
+            flex: 1;
+        }
+
+        .tgr-card-title h2 {
+            font-size: 1.6em;
+            margin-bottom: 5px;
+        }
+
+        .tgr-card-title .subtitle-en {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .tgr-total {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .tgr-card.technology .tgr-total { color: #1976D2; }
+        .tgr-card.growth .tgr-total { color: #388E3C; }
+        .tgr-card.rationalization .tgr-total { color: #F57C00; }
+
+        .tgr-breakdown {
+            margin-top: 20px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .breakdown-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chart-title {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .chart-subtitle {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .insights-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .insight-card {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .insight-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .insight-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .insight-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insight-card li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .insight-card li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .tech-insight {
+            background: #e3f2fd;
+            border-color: #1976D2;
+        }
+        .tech-insight h3 { color: #1976D2; }
+        .tech-insight li::before { color: #1976D2; }
+
+        .growth-insight {
+            background: #f1f8e9;
+            border-color: #388E3C;
+        }
+        .growth-insight h3 { color: #388E3C; }
+        .growth-insight li::before { color: #388E3C; }
+
+        .ratio-insight {
+            background: #fff3e0;
+            border-color: #F57C00;
+        }
+        .ratio-insight h3 { color: #F57C00; }
+        .ratio-insight li::before { color: #F57C00; }
+
+        .strategy-insight {
+            background: #fce4ec;
+            border-color: #C62828;
+        }
+        .strategy-insight h3 { color: #C62828; }
+        .strategy-insight li::before { color: #C62828; }
+
+        .comparison-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .comparison-table th {
+            background: #f5f5f5;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        @media (max-width: 1200px) {
+            .tgr-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .tgr-total {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>分析対象会社株式会社</h1>
+        <div class="subtitle">TGR分析（Transform-Grow-Run）2025年度</div>
+
+        <div class="tgr-overview">
+            <div class="overview-title">🎯 TGR分析とは</div>
+            <div class="overview-text">
+                TGR分析は、ガートナー社が提唱する企業のIT・事業投資を3つの戦略的カテゴリーに分類するフレームワークです。
+                <strong>Transform（変革）</strong>：新規事業創出やイノベーションへの投資、
+                <strong>Grow（成長）</strong>：既存事業の拡大・強化への投資、
+                <strong>Run（運営）</strong>：日常業務の維持・運営への投資、
+                のバランスを分析することで、企業の戦略的方向性と投資配分の適切性を評価します。分析対象会社の2025年度のキャッシュ配分を見ると、
+                <strong>総投資額2,811億円</strong>のうち、Transform 36.0%、Grow 35.9%、Run 28.1%という配分になっており、
+                変革と成長への投資をバランス良く推進しながら、適切な運営コストも確保する戦略が表れています。
+            </div>
+        </div>
+
+        <div class="tgr-cards">
+            <!-- Transform Card -->
+            <div class="tgr-card technology">
+                <div class="tgr-card-header">
+                    <div class="tgr-icon">🔬</div>
+                    <div class="tgr-card-title">
+                        <h2>Transform（変革）</h2>
+                        <div class="subtitle-en">新規事業・イノベーション投資</div>
+                    </div>
+                </div>
+                <div class="tgr-total">1,012億円</div>
+                <div style="text-align: center; color: #666; margin-bottom: 20px;">
+                    総投資の36.0%
+                </div>
+                <div class="tgr-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">研究開発費（R&D）</span>
+                        <span class="breakdown-value">1,012億円</span>
+                    </div>
+                    <div class="breakdown-item" style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #1976D2;">
+                        <span class="breakdown-label">対売上比率</span>
+                        <span class="breakdown-value">20.4%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grow Card -->
+            <div class="tgr-card growth">
+                <div class="tgr-card-header">
+                    <div class="tgr-icon">🚀</div>
+                    <div class="tgr-card-title">
+                        <h2>Grow（成長）</h2>
+                        <div class="subtitle-en">既存事業拡大投資</div>
+                    </div>
+                </div>
+                <div class="tgr-total">1,010億円</div>
+                <div style="text-align: center; color: #666; margin-bottom: 20px;">
+                    総投資の35.9%
+                </div>
+                <div class="tgr-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">無形資産取得</span>
+                        <span class="breakdown-value">458億円</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">有形固定資産取得</span>
+                        <span class="breakdown-value">411億円</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">その他成長投資</span>
+                        <span class="breakdown-value">141億円</span>
+                    </div>
+                    <div class="breakdown-item" style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #388E3C;">
+                        <span class="breakdown-label">対売上比率</span>
+                        <span class="breakdown-value">20.3%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Run Card -->
+            <div class="tgr-card rationalization">
+                <div class="tgr-card-header">
+                    <div class="tgr-icon">⚙️</div>
+                    <div class="tgr-card-title">
+                        <h2>Run（運営）</h2>
+                        <div class="subtitle-en">日常業務維持・株主還元</div>
+                    </div>
+                </div>
+                <div class="tgr-total">789億円</div>
+                <div style="text-align: center; color: #666; margin-bottom: 20px;">
+                    総投資の28.1%
+                </div>
+                <div class="tgr-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">配当金支払</span>
+                        <span class="breakdown-value">327億円</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">運転資本投資</span>
+                        <span class="breakdown-value">285億円</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">IT維持費等</span>
+                        <span class="breakdown-value">100億円</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">減価償却費（IT関連等）</span>
+                        <span class="breakdown-value">61億円</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">リース支払（IT関連等）</span>
+                        <span class="breakdown-value">16億円</span>
+                    </div>
+                    <div class="breakdown-item" style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #F57C00;">
+                        <span class="breakdown-label">対売上比率</span>
+                        <span class="breakdown-value">15.9%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <!-- TGR配分円グラフ -->
+            <div class="chart-container">
+                <div class="chart-title">📊 TGR配分比率</div>
+                <div class="chart-subtitle">総投資額2,738億円の内訳</div>
+                <div class="chart-wrapper">
+                    <canvas id="tgrPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 対売上比率 -->
+            <div class="chart-container">
+                <div class="chart-title">📈 対売上比率</div>
+                <div class="chart-subtitle">各カテゴリーの売上に対する比率</div>
+                <div class="chart-wrapper">
+                    <canvas id="salesRatioChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transform詳細分析 -->
+        <div class="chart-container" style="margin-bottom: 30px;">
+            <div class="chart-title">🔬 Grow投資の詳細内訳</div>
+            <div class="chart-subtitle">無形資産、有形資産、その他投資の構成</div>
+            <div class="chart-wrapper">
+                <canvas id="technologyDetailChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 業界比較表 -->
+        <div class="chart-container" style="margin-bottom: 30px;">
+            <div class="chart-title">🏢 製薬業界との比較（参考値）</div>
+            <div class="chart-subtitle">一般的な製薬企業とのTGR配分比較</div>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>カテゴリー</th>
+                        <th>分析対象会社（2025年）</th>
+                        <th>製薬業界平均（参考）</th>
+                        <th>差異</th>
+                        <th>評価</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Transform（変革）</strong></td>
+                        <td>36.0%（20.4%対売上）</td>
+                        <td>30-35%（15-20%対売上）</td>
+                        <td>+1.0～6.0pt</td>
+                        <td>✅ 変革投資積極的</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Grow（成長）</strong></td>
+                        <td>35.9%（20.3%対売上）</td>
+                        <td>35-40%（18-23%対売上）</td>
+                        <td>△4.1～0.9pt</td>
+                        <td>✅ 適正水準</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Run（運営）</strong></td>
+                        <td>28.1%（15.9%対売上）</td>
+                        <td>25-35%（15-20%対売上）</td>
+                        <td>△6.9～3.1pt</td>
+                        <td>✅ 適正水準</td>
+                    </tr>
+                    <tr style="background: #f5f5f5; font-weight: bold;">
+                        <td>合計</td>
+                        <td>100%</td>
+                        <td>100%</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="insights-section">
+            <div class="insights-title">💡 TGR分析から見る戦略的示唆</div>
+            <div class="insights-grid">
+                <div class="insight-card tech-insight">
+                    <h3><span class="insight-icon">🔬</span>Transform投資の特徴</h3>
+                    <ul>
+                        <li><strong>R&D費1,012億円に集中:</strong> 製薬業界平均15-18%を上回る20.4%の対売上比率で、新薬創出を最優先</li>
+                        <li><strong>純粋な変革投資:</strong> 無形資産取得はGrowに分類し、TransformはR&D費のみに特化</li>
+                        <li><strong>Transform投資36.0%:</strong> バランス型配分で、Growとほぼ同水準の投資を実施</li>
+                        <li><strong>2026年はさらに増加予定:</strong> ロカチンリマブ権利再取得で150-200億円の追加R&D投資</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card growth-insight">
+                    <h3><span class="insight-icon">🚀</span>Grow投資の特徴</h3>
+                    <ul>
+                        <li><strong>無形資産458億円が最大:</strong> 開発品・販売権取得で既存事業領域を拡張</li>
+                        <li><strong>米国工場建設411億円:</strong> 有形固定資産で製造能力を強化し、北米事業を加速</li>
+                        <li><strong>Grow比率35.9%:</strong> Transformとほぼ同水準で、変革と成長をバランス良く推進</li>
+                        <li><strong>総額1,010億円:</strong> 既存事業の拡大に積極投資し、収益基盤を強化</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card ratio-insight">
+                    <h3><span class="insight-icon">⚙️</span>Run投資の特徴</h3>
+                    <ul>
+                        <li><strong>配当327億円で株主還元:</strong> DOE 4%以上を維持し、累進配当政策を継続</li>
+                        <li><strong>運転資本285億円:</strong> 売上拡大に伴う正常な増加。効率化余地あり</li>
+                        <li><strong>IT関連177億円:</strong> 維持費100億円、減価償却61億円、リース16億円で業務基盤を維持</li>
+                        <li><strong>Run比率28.1%:</strong> 適正水準で、TransformとGrowに十分な原資を配分</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card strategy-insight">
+                    <h3><span class="insight-icon">🎯</span>TGR戦略の総合評価</h3>
+                    <ul>
+                        <li><strong>理想的なバランス型配分:</strong> Transform 36%、Grow 36%、Run 28%とバランスが取れた投資構造</li>
+                        <li><strong>変革と成長の両立:</strong> R&D投資と事業拡大投資をほぼ同水準で推進する戦略</li>
+                        <li><strong>財務基盤が支える積極戦略:</strong> 自己資本比率80.6%の強固な財務が高水準投資を可能に</li>
+                        <li><strong>運営効率化の余地:</strong> Run比率28%は適正だが、運転資本最適化でさらに改善可能</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-section" style="margin-top: 30px;">
+            <div class="insights-title">📌 TGR分析に基づく戦略的推奨事項</div>
+            <div class="overview-text">
+                <p style="margin-bottom: 15px;">
+                    <strong>1. Transform投資の継続と効率化:</strong> 
+                    現在の高水準R&D投資（20.4%）を維持しつつ、開発効率化により成功確率を向上。ロカチンリマブ、OTL-203など主要パイプラインの早期承認取得で事業変革を加速。
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>2. Grow投資の段階的拡大:</strong> 
+                    米国工場の本格稼働後、新興市場への展開や新規モダリティへの投資でGrow比率を25-30%に引き上げ、バランス型TGR配分を実現。既存事業の拡大と新規事業創出の両立を図る。
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>3. Run効率化:</strong> 
+                    運転資本の最適化（DSO短縮、在庫管理高度化）により、キャッシュ創出力を強化。創出したキャッシュをTransformとGrowに再配分し、成長サイクルを確立。
+                </p>
+                <p>
+                    <strong>4. TGRの動的管理:</strong> 
+                    パイプライン成功により収益が拡大する2027年以降、配当性向を引き上げつつ、TransformとGrowの絶対額も同時に増加させる好循環を構築。変革・成長・運営の3つのバランスを戦略的に調整。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TGR配分データ
+        const tgrData = {
+            labels: ['Transform（変革）', 'Grow（成長）', 'Run（運営）'],
+            values: [1012, 1010, 789],
+            colors: ['#1976D2', '#388E3C', '#F57C00']
+        };
+
+        // 対売上比率データ
+        const salesRatioData = {
+            labels: ['Transform（変革）', 'Grow（成長）', 'Run（運営）'],
+            values: [20.4, 20.3, 15.9],
+            colors: ['#1976D2', '#388E3C', '#F57C00']
+        };
+
+        // Grow詳細データ
+        const technologyDetailData = {
+            labels: ['無形資産取得', '有形固定資産取得', 'その他成長投資'],
+            values: [458, 411, 141],
+            colors: ['#388E3C', '#66BB6A', '#A5D6A7']
+        };
+
+        // 1. TGR配分円グラフ
+        const tgrPieCtx = document.getElementById('tgrPieChart').getContext('2d');
+        new Chart(tgrPieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: tgrData.labels,
+                datasets: [{
+                    data: tgrData.values,
+                    backgroundColor: tgrData.colors,
+                    borderWidth: 3,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 14 },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return [
+                                    `${label}: ${value}億円`,
+                                    `構成比: ${percentage}%`
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. 対売上比率棒グラフ
+        const salesRatioCtx = document.getElementById('salesRatioChart').getContext('2d');
+        new Chart(salesRatioCtx, {
+            type: 'bar',
+            data: {
+                labels: salesRatioData.labels,
+                datasets: [{
+                    label: '対売上比率（%）',
+                    data: salesRatioData.values,
+                    backgroundColor: salesRatioData.colors,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 35,
+                        title: {
+                            display: true,
+                            text: '対売上比率（%）'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `対売上比率: ${context.parsed.y}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. Grow詳細円グラフ
+        const techDetailCtx = document.getElementById('technologyDetailChart').getContext('2d');
+        new Chart(techDetailCtx, {
+            type: 'doughnut',
+            data: {
+                labels: technologyDetailData.labels,
+                datasets: [{
+                    data: technologyDetailData.values,
+                    backgroundColor: technologyDetailData.colors,
+                    borderWidth: 3,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 14 },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return [
+                                    `${label}: ${value}億円`,
+                                    `Grow内構成比: ${percentage}%`,
+                                    `対売上比率: ${(value / 4968 * 100).toFixed(1)}%`
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

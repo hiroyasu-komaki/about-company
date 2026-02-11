@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析対象会社 SWOT分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .swot-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .swot-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .swot-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+        }
+
+        .swot-icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+        }
+
+        .swot-title {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .swot-subtitle {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .swot-content {
+            list-style: none;
+        }
+
+        .swot-item {
+            margin-bottom: 18px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .swot-item::before {
+            content: "●";
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+
+        .item-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .item-detail {
+            font-size: 0.9em;
+            color: #555;
+            margin-left: 0;
+        }
+
+        /* Strengths - Blue */
+        .strengths {
+            border-top: 5px solid #4A90E2;
+        }
+        .strengths .swot-header {
+            border-color: #4A90E2;
+        }
+        .strengths .swot-title {
+            color: #4A90E2;
+        }
+        .strengths .swot-item::before {
+            color: #4A90E2;
+        }
+
+        /* Weaknesses - Red */
+        .weaknesses {
+            border-top: 5px solid #E84A5F;
+        }
+        .weaknesses .swot-header {
+            border-color: #E84A5F;
+        }
+        .weaknesses .swot-title {
+            color: #E84A5F;
+        }
+        .weaknesses .swot-item::before {
+            color: #E84A5F;
+        }
+
+        /* Opportunities - Green */
+        .opportunities {
+            border-top: 5px solid #2ECC71;
+        }
+        .opportunities .swot-header {
+            border-color: #2ECC71;
+        }
+        .opportunities .swot-title {
+            color: #2ECC71;
+        }
+        .opportunities .swot-item::before {
+            color: #2ECC71;
+        }
+
+        /* Threats - Orange */
+        .threats {
+            border-top: 5px solid #FF6B35;
+        }
+        .threats .swot-header {
+            border-color: #FF6B35;
+        }
+        .threats .swot-title {
+            color: #FF6B35;
+        }
+        .threats .swot-item::before {
+            color: #FF6B35;
+        }
+
+        .matrix-note {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .matrix-note h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .matrix-note p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 968px) {
+            .swot-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .swot-title {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>分析対象会社株式会社</h1>
+        <div class="subtitle">ビジネスモデル SWOT分析</div>
+
+        <div class="swot-grid">
+            <!-- Strengths -->
+            <div class="swot-box strengths">
+                <div class="swot-header">
+                    <div class="swot-icon">💪</div>
+                    <div>
+                        <div class="swot-title">強み (Strengths)</div>
+                        <div class="swot-subtitle">内部環境 - ポジティブ要因</div>
+                    </div>
+                </div>
+                <ul class="swot-content">
+                    <li class="swot-item">
+                        <div class="item-title">希少疾患領域での強固なポジション</div>
+                        <div class="item-detail">Crysvita: XLH治療で世界シェアトップ、高い参入障壁（技術・規制・市場規模）</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">抗体技術プラットフォーム</div>
+                        <div class="item-detail">Potelligeo（抗CCR4抗体）の成功実績、次世代抗体（ロカチンリマブ等）の開発継続</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">グローバル展開力</div>
+                        <div class="item-detail">北米市場でのプレゼンス確立、戦略的パートナーシップの活用</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">強固な財務基盤</div>
+                        <div class="item-detail">自己資本比率80.6%、実質無借金、R&D投資余力十分</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">技術収入の安定化</div>
+                        <div class="item-detail">ロイヤルティ収入の継続成長、パートナーシップの多角化</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Weaknesses -->
+            <div class="swot-box weaknesses">
+                <div class="swot-header">
+                    <div class="swot-icon">⚠️</div>
+                    <div>
+                        <div class="swot-title">弱み (Weaknesses)</div>
+                        <div class="swot-subtitle">内部環境 - ネガティブ要因</div>
+                    </div>
+                </div>
+                <ul class="swot-content">
+                    <li class="swot-item">
+                        <div class="item-title">日本事業の構造的減収</div>
+                        <div class="item-detail">薬価改定の継続的影響、長期収載品の市場縮小、対策: 新製品育成・コスト構造改革</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">R&D費の高水準継続</div>
+                        <div class="item-detail">対売上比20%超（業界平均15～18%）、ロカチンリマブ権利再取得で2026年は150～200億円増</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">製品集中リスク</div>
+                        <div class="item-detail">Crysvita依存度高い（全体の約40%）、競合品上市リスク、対策: パイプライン多様化・適応拡大</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">為替変動リスク</div>
+                        <div class="item-detail">海外売上75%超、円高時の減収・減益影響、対策: 自然ヘッジ・為替予約</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Opportunities -->
+            <div class="swot-box opportunities">
+                <div class="swot-header">
+                    <div class="swot-icon">🚀</div>
+                    <div>
+                        <div class="swot-title">機会 (Opportunities)</div>
+                        <div class="swot-subtitle">外部環境 - ポジティブ要因</div>
+                    </div>
+                </div>
+                <ul class="swot-content">
+                    <li class="swot-item">
+                        <div class="item-title">新製品の上市・拡大</div>
+                        <div class="item-detail">ziftomenib: AML市場でのシェア拡大、ロカチンリマブ: AD市場（数兆円規模）への参入、OTL-203: 遺伝子治療の新市場</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">適応拡大</div>
+                        <div class="item-detail">Crysvita: TIO等での追加適応、Poteligeo: 併用療法開発</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">技術収入の拡大</div>
+                        <div class="item-detail">抗体技術のライセンスアウト、既存品のロイヤルティ成長</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">新興市場での展開</div>
+                        <div class="item-detail">アジア・中東市場での希少疾患治療ニーズ</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Threats -->
+            <div class="swot-box threats">
+                <div class="swot-header">
+                    <div class="swot-icon">⚡</div>
+                    <div>
+                        <div class="swot-title">脅威 (Threats)</div>
+                        <div class="swot-subtitle">外部環境 - ネガティブ要因</div>
+                    </div>
+                </div>
+                <ul class="swot-content">
+                    <li class="swot-item">
+                        <div class="item-title">医療費抑制政策</div>
+                        <div class="item-detail">日本: 薬価改定の頻度・幅拡大、米国: IRA（インフレ削減法）の価格交渉、欧州: 各国の医療費削減圧力</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">競合の台頭</div>
+                        <div class="item-detail">Crysvita競合品の開発進展、バイオシミラーの影響（一部製品）</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">開発リスク</div>
+                        <div class="item-detail">臨床試験の失敗リスク、承認取得の不確実性</div>
+                    </li>
+                    <li class="swot-item">
+                        <div class="item-title">為替・地政学リスク</div>
+                        <div class="item-detail">円高進行、米中対立、ウクライナ情勢等</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="matrix-note">
+            <h2>📊 SWOT分析の活用ポイント</h2>
+            <p><strong>SO戦略（強み×機会）:</strong> 抗体技術と財務基盤を活かし、新製品上市とグローバル展開を加速。ロカチンリマブのAD市場参入で大型製品化を目指す。</p>
+            <p><strong>WO戦略（弱み×機会）:</strong> 新製品の成功により製品集中リスクを低減。技術収入拡大でR&D費の高水準を補完。</p>
+            <p><strong>ST戦略（強み×脅威）:</strong> 希少疾患の専門性と技術力で競合参入を抑制。強固な財務基盤で医療費抑制政策への耐性を確保。</p>
+            <p><strong>WT戦略（弱み×脅威）:</strong> パイプライン多様化で製品集中リスクと競合リスクに対処。コスト構造改革で薬価改定の影響を最小化。</p>
+        </div>
+    </div>
+</body>
+</html>

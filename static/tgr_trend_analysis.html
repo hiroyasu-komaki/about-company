@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析対象会社 TGR推移分析（2021-2025年）</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chart-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .chart-subtitle {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 450px;
+        }
+
+        .data-table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border: 1px solid #eee;
+            text-align: right;
+        }
+
+        .data-table td.label {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .data-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .insights-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .insight-card {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .insight-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .insight-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .insight-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insight-card li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .insight-card li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .transform-insight {
+            background: #e3f2fd;
+            border-color: #1976D2;
+        }
+        .transform-insight h3 { color: #1976D2; }
+        .transform-insight li::before { color: #1976D2; }
+
+        .grow-insight {
+            background: #f1f8e9;
+            border-color: #388E3C;
+        }
+        .grow-insight h3 { color: #388E3C; }
+        .grow-insight li::before { color: #388E3C; }
+
+        .run-insight {
+            background: #fff3e0;
+            border-color: #F57C00;
+        }
+        .run-insight h3 { color: #F57C00; }
+        .run-insight li::before { color: #F57C00; }
+
+        .trend-insight {
+            background: #fce4ec;
+            border-color: #C62828;
+        }
+        .trend-insight h3 { color: #C62828; }
+        .trend-insight li::before { color: #C62828; }
+
+        @media (max-width: 1200px) {
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>分析対象会社株式会社</h1>
+        <div class="subtitle">TGR推移分析（2021年～2025年）</div>
+
+        <!-- 金額推移グラフ -->
+        <div class="chart-container">
+            <div class="chart-title">📊 TGR投資額の推移（2021年～2025年）</div>
+            <div class="chart-subtitle">Transform・Grow・Runの投資金額の変化</div>
+            <div class="chart-wrapper">
+                <canvas id="amountChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 比率推移グラフ -->
+        <div class="chart-container">
+            <div class="chart-title">📈 TGR構成比率の推移（2021年～2025年）</div>
+            <div class="chart-subtitle">総投資に占める各カテゴリーの比率（100%積み上げ）</div>
+            <div class="chart-wrapper">
+                <canvas id="ratioChart"></canvas>
+            </div>
+        </div>
+
+        <!-- データテーブル -->
+        <div class="chart-container">
+            <div class="chart-title">📋 TGR推移データ詳細</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">カテゴリー</th>
+                        <th colspan="5">投資額（億円）</th>
+                        <th colspan="5">構成比率（%）</th>
+                    </tr>
+                    <tr>
+                        <th>2021</th>
+                        <th>2022</th>
+                        <th>2023</th>
+                        <th>2024</th>
+                        <th>2025</th>
+                        <th>2021</th>
+                        <th>2022</th>
+                        <th>2023</th>
+                        <th>2024</th>
+                        <th>2025</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label">Transform（変革）</td>
+                        <td>577</td>
+                        <td>629</td>
+                        <td>721</td>
+                        <td>1,035</td>
+                        <td>1,012</td>
+                        <td>42.8%</td>
+                        <td>39.6%</td>
+                        <td>40.9%</td>
+                        <td>38.2%</td>
+                        <td>36.0%</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Grow（成長）</td>
+                        <td>199</td>
+                        <td>287</td>
+                        <td>327</td>
+                        <td>1,052</td>
+                        <td>1,010</td>
+                        <td>14.7%</td>
+                        <td>18.1%</td>
+                        <td>18.6%</td>
+                        <td>38.8%</td>
+                        <td>35.9%</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Run（運営）</td>
+                        <td>575</td>
+                        <td>671</td>
+                        <td>713</td>
+                        <td>622</td>
+                        <td>789</td>
+                        <td>42.6%</td>
+                        <td>42.3%</td>
+                        <td>40.5%</td>
+                        <td>23.0%</td>
+                        <td>28.1%</td>
+                    </tr>
+                    <tr style="background: #f5f5f5; font-weight: bold;">
+                        <td class="label">総投資額</td>
+                        <td>1,351</td>
+                        <td>1,587</td>
+                        <td>1,761</td>
+                        <td>2,709</td>
+                        <td>2,811</td>
+                        <td>100%</td>
+                        <td>100%</td>
+                        <td>100%</td>
+                        <td>100%</td>
+                        <td>100%</td>
+                    </tr>
+                    <tr style="background: #e3f2fd;">
+                        <td class="label">売上収益（参考）</td>
+                        <td>3,706</td>
+                        <td>4,323</td>
+                        <td>4,422</td>
+                        <td>4,956</td>
+                        <td>4,968</td>
+                        <td colspan="5" style="text-align: center;">対売上総投資比率: 36.5% → 36.7% → 39.8% → 54.7% → 56.6%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="insights-section">
+            <div class="insights-title">💡 5年間のTGR推移から見る戦略変化</div>
+            <div class="insights-grid">
+                <div class="insight-card transform-insight">
+                    <h3><span class="insight-icon">🔬</span>Transform投資の推移</h3>
+                    <ul>
+                        <li><strong>5年で1.75倍に増加:</strong> 577億円（2021年）→1,012億円（2025年）と着実に拡大</li>
+                        <li><strong>2024年にピーク:</strong> 1,035億円でR&D投資を最大化、2025年はやや調整</li>
+                        <li><strong>構成比は低下傾向:</strong> 42.8%→36.0%。Growの急拡大により相対的に低下</li>
+                        <li><strong>対売上比率は安定:</strong> 15-21%の範囲で推移し、変革投資を継続</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card grow-insight">
+                    <h3><span class="insight-icon">🚀</span>Grow投資の推移</h3>
+                    <ul>
+                        <li><strong>5年で5.1倍に急拡大:</strong> 199億円（2021年）→1,010億円（2025年）と劇的に増加</li>
+                        <li><strong>2024年に転換点:</strong> 1,052億円と過去最高。無形資産取得796億円が寄与</li>
+                        <li><strong>構成比が急上昇:</strong> 14.7%→35.9%。2024年以降、Transformと同水準に</li>
+                        <li><strong>戦略的シフト:</strong> 2023年まで控えめ→2024年以降積極投資へ転換</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card run-insight">
+                    <h3><span class="insight-icon">⚙️</span>Run投資の推移</h3>
+                    <ul>
+                        <li><strong>絶対額は増加傾向:</strong> 575億円（2021年）→789億円（2025年）</li>
+                        <li><strong>構成比は大幅低下:</strong> 42.6%→28.1%。TransformとGrow重視の結果</li>
+                        <li><strong>2024年に一時減少:</strong> 622億円まで圧縮。運営効率化が進展</li>
+                        <li><strong>適正水準を維持:</strong> 配当と運転資本を適切に管理しながら投資原資を確保</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card trend-insight">
+                    <h3><span class="insight-icon">📊</span>全体トレンド分析</h3>
+                    <ul>
+                        <li><strong>総投資額2.1倍:</strong> 1,351億円→2,811億円。売上成長（1.34倍）を大きく上回る投資</li>
+                        <li><strong>2024年が転換期:</strong> Grow投資が急拡大し、バランス型TGRへ移行</li>
+                        <li><strong>2021-2023年: Transform重視型</strong>（Transform 40%超、Grow 15-20%、Run 40%前後）</li>
+                        <li><strong>2024-2025年: バランス型</strong>（Transform 36-38%、Grow 36-39%、Run 23-28%）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-section" style="margin-top: 30px;">
+            <div class="insights-title">🎯 戦略的示唆と今後の方向性</div>
+            <div style="line-height: 1.8; color: #555;">
+                <p style="margin-bottom: 15px;">
+                    <strong>1. 2024年の戦略転換:</strong> 
+                    無形資産取得796億円（2024年）により、Grow投資が急拡大。これはパイプライン強化と事業領域拡大を意図した戦略的転換点。ロカチンリマブ権利再取得など、大型案件が集中。
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>2. バランス型TGRの確立:</strong> 
+                    2025年にTransform 36%、Grow 36%とほぼ同水準となり、変革と成長を両立する理想的な配分を実現。Run 28%も適正水準で、財務規律を維持。
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>3. 投資対効果の検証期:</strong> 
+                    2024-2025年の高水準投資（総投資額2,700億円超）が、2026年以降の収益拡大につながるかが焦点。新製品上市とパイプライン成功が鍵。
+                </p>
+                <p>
+                    <strong>4. 持続可能な投資水準:</strong> 
+                    対売上総投資比率56.6%（2025年）は高水準。営業CF 1,000億円に対し総投資2,811億円は、財務基盤（自己資本比率80.6%）があってこそ可能な積極戦略。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 5年間のTGRデータ
+        const years = ['2021', '2022', '2023', '2024', '2025'];
+        
+        // 投資額データ（億円）
+        const transformAmount = [577, 629, 721, 1035, 1012];
+        const growAmount = [199, 287, 327, 1052, 1010];
+        const runAmount = [575, 671, 713, 622, 789];
+        
+        // 構成比データ（%）
+        const transformRatio = [42.8, 39.6, 40.9, 38.2, 36.0];
+        const growRatio = [14.7, 18.1, 18.6, 38.8, 35.9];
+        const runRatio = [42.6, 42.3, 40.5, 23.0, 28.1];
+
+        // 1. 金額推移グラフ（積み上げ棒グラフ）
+        const amountCtx = document.getElementById('amountChart').getContext('2d');
+        new Chart(amountCtx, {
+            type: 'bar',
+            data: {
+                labels: years,
+                datasets: [
+                    {
+                        label: 'Transform（変革）',
+                        data: transformAmount,
+                        backgroundColor: '#1976D2',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Grow（成長）',
+                        data: growAmount,
+                        backgroundColor: '#388E3C',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Run（運営）',
+                        data: runAmount,
+                        backgroundColor: '#F57C00',
+                        borderWidth: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '投資額（億円）',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + '億円';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { size: 14 },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label;
+                                const value = context.parsed.y;
+                                return `${label}: ${value}億円`;
+                            },
+                            footer: function(tooltipItems) {
+                                let total = 0;
+                                tooltipItems.forEach(item => {
+                                    total += item.parsed.y;
+                                });
+                                return `総投資額: ${total.toLocaleString()}億円`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. 比率推移グラフ（100%積み上げ棒グラフ）
+        const ratioCtx = document.getElementById('ratioChart').getContext('2d');
+        new Chart(ratioCtx, {
+            type: 'bar',
+            data: {
+                labels: years,
+                datasets: [
+                    {
+                        label: 'Transform（変革）',
+                        data: transformRatio,
+                        backgroundColor: '#1976D2',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Grow（成長）',
+                        data: growRatio,
+                        backgroundColor: '#388E3C',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Run（運営）',
+                        data: runRatio,
+                        backgroundColor: '#F57C00',
+                        borderWidth: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: '構成比率（%）',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { size: 14 },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label;
+                                const value = context.parsed.y;
+                                const yearIndex = context.dataIndex;
+                                let actualAmount = 0;
+                                if (label.includes('Transform')) actualAmount = transformAmount[yearIndex];
+                                else if (label.includes('Grow')) actualAmount = growAmount[yearIndex];
+                                else if (label.includes('Run')) actualAmount = runAmount[yearIndex];
+                                return [
+                                    `${label}: ${value.toFixed(1)}%`,
+                                    `実額: ${actualAmount}億円`
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析対象会社 クロスSWOT分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .cross-swot-matrix {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            border: 2px solid #e0e0e0;
+            padding: 25px;
+            vertical-align: top;
+        }
+
+        /* ヘッダー行 */
+        .header-corner {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            width: 15%;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .header-opportunities {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            width: 42.5%;
+            text-align: center;
+        }
+
+        .header-threats {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            width: 42.5%;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-icon {
+            font-size: 1.3em;
+            margin-right: 10px;
+        }
+
+        .header-subtitle {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        /* サイドヘッダー */
+        .side-header-strengths {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            font-weight: bold;
+            text-align: center;
+            width: 15%;
+        }
+
+        .side-header-weaknesses {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            font-weight: bold;
+            text-align: center;
+            width: 15%;
+        }
+
+        .side-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .side-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        /* 戦略セル */
+        .strategy-cell {
+            font-size: 0.95em;
+            line-height: 1.7;
+        }
+
+        .strategy-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+            display: flex;
+            align-items: center;
+        }
+
+        .strategy-icon {
+            font-size: 1.3em;
+            margin-right: 10px;
+        }
+
+        .strategy-list {
+            list-style: none;
+        }
+
+        .strategy-item {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .strategy-item::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .strategy-item-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .strategy-item-detail {
+            font-size: 0.9em;
+            color: #555;
+            margin-left: 0;
+        }
+
+        /* SO戦略（強み×機会） */
+        .so-strategy {
+            background: linear-gradient(135deg, #e8f5ff 0%, #d4edff 100%);
+        }
+        .so-strategy .strategy-title {
+            color: #1976D2;
+            border-color: #1976D2;
+        }
+        .so-strategy .strategy-item::before {
+            color: #1976D2;
+        }
+
+        /* ST戦略（強み×脅威） */
+        .st-strategy {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        }
+        .st-strategy .strategy-title {
+            color: #F57C00;
+            border-color: #F57C00;
+        }
+        .st-strategy .strategy-item::before {
+            color: #F57C00;
+        }
+
+        /* WO戦略（弱み×機会） */
+        .wo-strategy {
+            background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+        }
+        .wo-strategy .strategy-title {
+            color: #388E3C;
+            border-color: #388E3C;
+        }
+        .wo-strategy .strategy-item::before {
+            color: #388E3C;
+        }
+
+        /* WT戦略（弱み×脅威） */
+        .wt-strategy {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+        }
+        .wt-strategy .strategy-title {
+            color: #C62828;
+            border-color: #C62828;
+        }
+        .wt-strategy .strategy-item::before {
+            color: #C62828;
+        }
+
+        .explanation-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .explanation-box h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .explanation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .explanation-item {
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid;
+        }
+
+        .explanation-item h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .explanation-item p {
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .exp-so {
+            background: #e8f5ff;
+            border-color: #1976D2;
+        }
+        .exp-so h3 { color: #1976D2; }
+
+        .exp-wo {
+            background: #f1f8e9;
+            border-color: #388E3C;
+        }
+        .exp-wo h3 { color: #388E3C; }
+
+        .exp-st {
+            background: #fff8e1;
+            border-color: #F57C00;
+        }
+        .exp-st h3 { color: #F57C00; }
+
+        .exp-wt {
+            background: #fce4ec;
+            border-color: #C62828;
+        }
+        .exp-wt h3 { color: #C62828; }
+
+        @media (max-width: 1200px) {
+            .matrix-table th,
+            .matrix-table td {
+                padding: 15px;
+                font-size: 0.85em;
+            }
+
+            .strategy-title {
+                font-size: 1em;
+            }
+
+            .explanation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .cross-swot-matrix {
+                overflow-x: auto;
+            }
+
+            .matrix-table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>分析対象会社株式会社</h1>
+        <div class="subtitle">クロスSWOT分析（SWOT戦略マトリクス）</div>
+
+        <div class="cross-swot-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th class="header-corner">
+                            <div>内部環境</div>
+                            <div style="font-size: 2em; margin: 10px 0;">×</div>
+                            <div>外部環境</div>
+                        </th>
+                        <th class="header-opportunities">
+                            <div class="header-title">
+                                <span class="header-icon">🚀</span>
+                                機会 (Opportunities)
+                            </div>
+                            <div class="header-subtitle">外部環境のポジティブ要因</div>
+                        </th>
+                        <th class="header-threats">
+                            <div class="header-title">
+                                <span class="header-icon">⚡</span>
+                                脅威 (Threats)
+                            </div>
+                            <div class="header-subtitle">外部環境のネガティブ要因</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 強み × 機会/脅威 -->
+                    <tr>
+                        <td class="side-header-strengths">
+                            <div class="side-title">
+                                <span class="side-icon">💪</span>
+                                <div>強み</div>
+                                <div style="font-size: 0.8em; margin-top: 5px;">(Strengths)</div>
+                            </div>
+                        </td>
+                        <td class="strategy-cell so-strategy">
+                            <div class="strategy-title">
+                                <span class="strategy-icon">🎯</span>
+                                SO戦略（積極化戦略）
+                            </div>
+                            <ul class="strategy-list">
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">1. ロカチンリマブによるAD市場参入の加速</div>
+                                    <div class="strategy-item-detail">抗体技術の強みを活かし、数兆円規模のアトピー性皮膚炎市場で大型製品化を実現。権利100%再取得により収益最大化を図る。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">2. 北米市場での製品ポートフォリオ拡充</div>
+                                    <div class="strategy-item-detail">既存のプレゼンスとziftomenibの成功を組み合わせ、グローバル戦略品の売上比率をさらに拡大。新製品上市で北米40%超の構成比を目指す。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">3. 遺伝子治療分野でのファーストムーバー優位性確立</div>
+                                    <div class="strategy-item-detail">OTL-203をテコに希少疾患の遺伝子治療市場でポジション確立。技術収入とロイヤルティの新たな柱を構築。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">4. 財務基盤を活用した戦略的M&A実行</div>
+                                    <div class="strategy-item-detail">自己資本比率80.6%の強固な財務基盤を活かし、新規モダリティや補完的パイプラインの獲得を推進。技術収入拡大にも貢献。</div>
+                                </li>
+                            </ul>
+                        </td>
+                        <td class="strategy-cell st-strategy">
+                            <div class="strategy-title">
+                                <span class="strategy-icon">🛡️</span>
+                                ST戦略（差別化戦略）
+                            </div>
+                            <ul class="strategy-list">
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">1. 希少疾患専門性による参入障壁強化</div>
+                                    <div class="strategy-item-detail">高度な抗体技術と臨床開発ノウハウで競合の追随を困難にし、Crysvitaの市場ポジションを長期維持。医療費抑制下でも高付加価値を訴求。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">2. パートナーシップによるリスク分散</div>
+                                    <div class="strategy-item-detail">グローバル展開力を活かし、地政学リスクや開発リスクを戦略的提携で軽減。Ultragenyx、Kura Oncologyとのリスクシェア継続。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">3. 技術収入基盤による価格圧力への耐性確保</div>
+                                    <div class="strategy-item-detail">製品売上88%+技術収入12%の二本柱構造で、各国の薬価抑制政策の影響を緩和。ロイヤルティ収入の継続成長で収益安定化。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">4. 財務余力による開発継続と競争優位性維持</div>
+                                    <div class="strategy-item-detail">実質無借金経営により、臨床試験の失敗リスクや市場変動に対しても安定的なR&D投資を継続。長期的競争力を確保。</div>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <!-- 弱み × 機会/脅威 -->
+                    <tr>
+                        <td class="side-header-weaknesses">
+                            <div class="side-title">
+                                <span class="side-icon">⚠️</span>
+                                <div>弱み</div>
+                                <div style="font-size: 0.8em; margin-top: 5px;">(Weaknesses)</div>
+                            </div>
+                        </td>
+                        <td class="strategy-cell wo-strategy">
+                            <div class="strategy-title">
+                                <span class="strategy-icon">🔄</span>
+                                WO戦略（改善戦略）
+                            </div>
+                            <ul class="strategy-list">
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">1. 新製品ポートフォリオによる製品集中リスク解消</div>
+                                    <div class="strategy-item-detail">ロカチンリマブ、OTL-203の上市でCrysvita依存（40%）を30%以下に低減。適応拡大と新市場参入で収益源を多様化。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">2. 技術収入拡大によるR&D費負担の相対的軽減</div>
+                                    <div class="strategy-item-detail">抗体技術のライセンスアウト強化で技術収入比率を15%以上に拡大。高水準のR&D投資（20%超）を継続しつつ、利益率改善を実現。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">3. グローバル展開加速による日本市場依存度低下</div>
+                                    <div class="strategy-item-detail">北米・新興市場での新製品展開により、日本構成比を20%以下に削減。薬価改定の影響を構造的に緩和。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">4. 米国製造拠点確立による為替リスク軽減</div>
+                                    <div class="strategy-item-detail">カリフォルニア工場の本格稼働で北米売上（38.7%）のコストを現地通貨化。自然ヘッジ効果により為替変動の影響を半減。</div>
+                                </li>
+                            </ul>
+                        </td>
+                        <td class="strategy-cell wt-strategy">
+                            <div class="strategy-title">
+                                <span class="strategy-icon">⚔️</span>
+                                WT戦略（防衛・撤退戦略）
+                            </div>
+                            <ul class="strategy-list">
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">1. 日本事業の抜本的構造改革</div>
+                                    <div class="strategy-item-detail">長期収載品の段階的縮小と新製品（フォゼベル、ダーブロック）への集中投資。コスト構造改革で薬価改定と競合圧力に対応。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">2. パイプライン成功確率向上とポートフォリオ最適化</div>
+                                    <div class="strategy-item-detail">開発リスクの高いプロジェクトは早期判断で中止。Phase IIIに集中投資し、臨床試験の失敗による財務影響を最小化。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">3. Crysvita適応拡大による競合対策</div>
+                                    <div class="strategy-item-detail">TIO等での追加適応取得と併用療法開発で製品ライフサイクル延長。競合品上市の影響を限定し、製品集中リスクに対処。</div>
+                                </li>
+                                <li class="strategy-item">
+                                    <div class="strategy-item-title">4. 為替ヘッジと価格戦略の高度化</div>
+                                    <div class="strategy-item-detail">海外売上75%超の為替リスクに対し、先物予約と製造地分散で対応。各国の医療費抑制政策下でも収益確保できる価格戦略を構築。</div>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="explanation-box">
+            <h2>📈 クロスSWOT戦略の解説</h2>
+            <div class="explanation-grid">
+                <div class="explanation-item exp-so">
+                    <h3>SO戦略（積極化戦略）</h3>
+                    <p>強みを最大限に活かして機会を捉える攻めの戦略。分析対象会社は抗体技術と財務基盤という強みを活かし、ロカチンリマブのAD市場参入、北米での事業拡大、遺伝子治療分野への進出など、成長機会を積極的に追求します。</p>
+                </div>
+
+                <div class="explanation-item exp-wo">
+                    <h3>WO戦略（改善戦略）</h3>
+                    <p>弱みを克服して機会を活かす戦略。製品集中リスクや高水準R&D費という弱みに対し、新製品ポートフォリオの拡充、技術収入の拡大、グローバル展開の加速により、弱点を補完しながら成長機会を取り込みます。</p>
+                </div>
+
+                <div class="explanation-item exp-st">
+                    <h3>ST戦略（差別化戦略）</h3>
+                    <p>強みを活かして脅威に対抗する防御戦略。希少疾患での専門性、パートナーシップネットワーク、技術収入基盤という強みにより、医療費抑制政策、競合の台頭、地政学リスクといった外部脅威の影響を最小化します。</p>
+                </div>
+
+                <div class="explanation-item exp-wt">
+                    <h3>WT戦略（防衛・撤退戦略）</h3>
+                    <p>弱みと脅威が重なる最も厳しい状況への対処戦略。日本事業の構造改革、開発ポートフォリオの最適化、Crysvitaのライフサイクル管理、為替ヘッジ強化により、リスクを最小化し、事業の持続可能性を確保します。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="explanation-box" style="margin-top: 20px;">
+            <h2>🎯 戦略実行の優先順位</h2>
+            <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
+                <strong>短期（1-2年）:</strong> SO戦略とST戦略を優先。ロカチンリマブの承認取得・上市、ziftomenibの市場浸透、北米事業拡大に経営資源を集中。同時に希少疾患の専門性強化で競合参入を抑制。
+            </p>
+            <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
+                <strong>中期（3-5年）:</strong> WO戦略を本格展開。新製品ポートフォリオの確立により製品集中リスクを解消。技術収入15%以上、日本構成比20%以下を達成し、事業構造を転換。
+            </p>
+            <p style="line-height: 1.8; color: #555;">
+                <strong>継続的取り組み:</strong> WT戦略による構造的課題への対処。日本事業の収益性改善、開発効率化、為替リスク管理を恒常的に推進し、外部環境変化への耐性を強化。
+            </p>
+        </div>
+    </div>
+</body>
+</html>

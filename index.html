@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>about-company — 企業分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.2em;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1em;
+            margin-bottom: 40px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: grid;
+            gap: 16px;
+        }
+
+        .nav-list a {
+            display: block;
+            background: white;
+            border-radius: 16px;
+            padding: 24px 28px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-list a:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+        }
+
+        .nav-list a::after {
+            content: " →";
+            color: #667eea;
+            font-weight: normal;
+        }
+
+        .footer {
+            margin-top: 48px;
+            text-align: center;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>about-company</h1>
+        <p class="subtitle">公開データを用いた企業分析・可視化（個人の学習用）</p>
+
+        <ul class="nav-list">
+            <li><a href="static/swot_analysis.html">SWOT分析</a></li>
+            <li><a href="static/cross_swot_analysis.html">クロスSWOT分析</a></li>
+            <li><a href="static/sales_composition.html">売上構成</a></li>
+            <li><a href="static/seasonality_analysis.html">季節性分析</a></li>
+            <li><a href="static/tgr_analysis.html">TGR分析</a></li>
+            <li><a href="static/tgr_trend_analysis.html">TGRトレンド分析</a></li>
+        </ul>
+
+        <p class="footer">
+            <a href="https://github.com/hiroyasukomaki/about-company">GitHub リポジトリ</a>
+        </p>
+    </div>
+</body>
+</html>
