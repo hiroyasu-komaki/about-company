@@ -15,7 +15,7 @@
 
 ## 静的ファイル（可視化・分析ページ）
 
-GitHub Pages で公開している場合は、トップの `index.html` から次のページへ遷移できます。
+GitHub Pages で公開している場合は、[こちら](https://hiroyasu-komaki.github.io/about-company/)から次のページへ遷移できます。
 
 | ファイル | 内容 |
 |---------|------|
